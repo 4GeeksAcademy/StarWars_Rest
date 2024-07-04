@@ -120,8 +120,160 @@ def delete_favorite_people(people_id):
         return jsonify({'message':'Favorite deleted'}),200
     return jsonify({'message':'Favorite not found'}), 404
 
-    
+# **Planet Endpoints**
 
+# Create a new planet (POST)
+@app.route('/planets', methods=['POST'])
+def create_planet():
+    try:
+        # Get planet data from request body
+        request_data = request.get_json()
+        name = request_data.get('name')
+        climate = request_data.get('climate')
+        terrain = request_data.get('terrain')
+
+        # Validate required fields
+        if not all([name, climate, terrain]):
+            return jsonify({'message': 'Missing required fields'}), 400
+
+        # Create and save new planet
+        new_planet = Planet(name=name, climate=climate, terrain=terrain)
+        db.session.add(new_planet)
+        db.session.commit()
+
+        return jsonify(new_planet.to_dict()), 201  # Created
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({'message': str(e)}), 500  # Internal Server Error
+    
+# Update an existing planet (PUT)
+@app.route('/planets/<int:planet_id>', methods=['PUT'])
+def update_planet(planet_id):
+    try:
+        # Get planet data from request body
+        request_data = request.get_json()
+        name = request_data.get('name')
+        climate = request_data.get('climate')
+        terrain = request_data.get('terrain')
+
+        # Check if planet exists
+        planet = Planet.query.get(planet_id)
+        if not planet:
+            return jsonify({'message': 'Planet not found'}), 404  # Not Found
+
+        # Update planet fields (if provided)
+        if name:
+            planet.name = name
+        if climate:
+            planet.climate = climate
+        if terrain:
+            planet.terrain = terrain
+        
+        db.session.commit()
+
+        return jsonify(planet.to_dict()), 200  # OK
+
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({'message': str(e)}), 500  # Internal Server Error
+    
+# Delete a planet (DELETE)
+@app.route('/planets/<int:planet_id>', methods=['DELETE'])
+def delete_planet(planet_id):
+    try:
+        # Check if planet exists
+        planet = Planet.query.get(planet_id)
+        if not planet:
+            return jsonify({'message': 'Planet not found'}), 404  # Not Found
+
+        # Delete planet
+        db.session.delete(planet)
+        db.session.commit()
+
+        return jsonify({'message': 'Planet deleted'}), 200  # OK
+
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({'message': str(e)}), 500  # Internal Server Error
+    
+# **People Endpoints**
+
+# Create a new person (POST)
+@app.route('/people', methods=['POST'])
+def create_person():
+    try:
+        # Get person data from request body
+        request_data = request.get_json()
+        name = request_data.get('name')
+        birth_year = request_data.get('birth_year')
+        gender = request_data.get('gender')
+
+        # Validate required fields
+        if not all([name, birth_year, gender,]):
+            return jsonify({'message': 'Missing required fields'}), 400
+
+        # Create and save new person
+        new_person = People(name=name, birth_year=birth_year, gender=gender)
+        db.session.add(new_person)
+        db.session.commit()
+
+        return jsonify(new_person.to_dict()), 201  # Created
+
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({'message': str(e)}), 500  # Internal Server Error
+    
+# Update an existing person (PUT)
+@app.route('/people/<int:person_id>', methods=['PUT'])
+def update_person(person_id):
+    try:
+        # Get person data from request body
+        request_data = request.get_json()
+        name = request_data.get('name')
+        birth_year = request_data.get('birth_year')
+        gender = request_data.get('gender')
+
+        # Check if person exists
+        person = People.query.get(person_id)
+        if not person:
+            return jsonify({'message': 'Person not found'}), 404  # Not Found
+
+        # Update person fields (if provided)
+        if name:
+            person.name = name
+        if birth_year:
+            person.birth_year = birth_year
+        if gender:
+            person.gender = gender
+
+        db.session.commit()
+
+        return jsonify(person.to_dict()), 200  # OK
+
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({'message': str(e)}), 500  # Internal Server Error
+    
+# Delete a person (DELETE)
+@app.route('/people/<int:person_id>', methods=['DELETE'])
+def delete_person(person_id):
+    try:
+        # Check if person exists
+        person = People.query.get(person_id)
+        if not person:
+            return jsonify({'message': 'Person not found'}), 404  # Not Found
+
+        # Delete person
+        db.session.delete(person)
+        db.session.commit()
+
+        return jsonify({'message': 'Person deleted'}), 200  # OK
+
+    except Exception as e:
+        # Handle unexpected errors
+        return jsonify({'message': str(e)}), 500  # Internal Server Error
+
+   
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
